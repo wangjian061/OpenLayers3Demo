@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <title>Tiled WMS example</title>
+    <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="http://openlayers.org/en/v3.8.2/css/ol.css" type="text/css">
+    <script src="http://openlayers.org/en/v3.8.2/build/ol.js"></script>
+
+</head>
+<body>
+<div class="container-fluid">
+
+    <div class="row-fluid">
+        <div class="span12">
+            <div id="map" class="map"></div>
+        </div>
+    </div>
+
+</div>
+<script>
+    var map;
+    function init(){
+        var bounds = new GeoSurf.Bounds(
+                59.99166666666667,0.008333333333333304,152.49166666666667,90.00833333333334
+        );
+        var options = {
+            units: 'degrees'
+        };
+        map = new GeoSurf.PortalMap('map', options);
+
+
+        <!--地址以及所有参数-->
+        //http://localhost:8090/geoserver/test/wms
+        // service=WMS
+        // version=1.1.0
+        // request=GetMap
+        // layers=test:HenanCropStructure
+        // styles=
+        // bbox=408660.0,3448620.0,1053780.0,4064280.0
+        // width=768&height=732
+        // srs=EPSG:32649
+        // format=application/openlayers
+
+        var ll = new GeoSurf.Layer.WMS(
+                "TerrainShade", "http://localhost:8090/geoserver/test/wms",
+                {
+                    layers: 'HenanCropStructure',
+                    tilesOrigin : map.maxExtent.left + ',' + map.maxExtent.bottom
+                },
+                {
+                    buffer: 0,
+                    resolutions:[0.016666666666666666,0.033333333333333326,
+                        0.06666666666666667,0.13333333333333333],
+                    maxExtent: bounds,
+                    displayOutsideMaxExtent: false
+                }
+        );
+
+        map.addLayer(ll);
+        map.zoomToExtent(bounds);
+
+    }
+
+
+
+</script>
+
+</body>
+</html>

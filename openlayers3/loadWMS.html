@@ -1,0 +1,145 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Ol3 wms</title>
+    <link rel="stylesheet" href="http://openlayers.org/en/v3.12.1/css/ol.css" type="text/css">
+    <style type="text/css">
+        body, #map {
+            border: 0px;
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            height: 100%;
+            font-size: 13px;
+        }
+
+        #css_animation {
+            height: 50px;
+            width: 50px;
+            border-radius: 25px;
+            background: rgba(255, 0, 0, 0.9);
+
+            transform: scale(0);
+            animation: myfirst 3s;
+            animation-iteration-count: infinite;
+        }
+
+        @keyframes myfirst {
+            to {
+                transform: scale(2);
+                background: rgba(0, 0, 0, 0);
+            }
+        }
+    </style>
+
+    <script src="http://openlayers.org/en/v3.12.1/build/ol.js"></script>
+    <script type="text/javascript" src="jj.js"></script>
+
+
+</head>
+<body>
+
+
+<div id="map" style="width: 100%;height: 50%">
+</div>
+<div id="marker">
+    <img src="../data/icon_red.png" width="37px" height="50px">
+</div>
+<div id="css_animation">
+</div>
+<script type="text/javascript">
+
+    var format = 'image/png';
+    var projection = new ol.proj.Projection({
+        code: 'EPSG:32649',
+        units: 'm',
+        axisOrientation: 'neu'
+    });
+    //加载天地图服务
+    var tian_di_tu_road_layer = new ol.layer.Tile({
+        title: "天地图路网",
+        source: new ol.source.XYZ({
+            url: "http://t4.tianditu.com/DataServer?T=vec_w&x={x}&y={y}&l={z}"
+        })
+    });
+    var tian_di_tu_annotation = new ol.layer.Tile({
+        title: "天地图文字标注",
+        source: new ol.source.XYZ({
+            url: 'http://t3.tianditu.com/DataServer?T=cva_w&x={x}&y={y}&l={z}'
+        })
+    });
+    //从GS加载WMS服务
+    var untiled = new ol.layer.Image({
+        source: new ol.source.ImageWMS({
+            ratio: 1,
+            url: 'http://localhost:8090/geoserver/test/wms',
+            params: {
+                'FORMAT': format,
+                'VERSION': '1.1.1',
+                LAYERS: 'test:HenanCropStructure',
+                STYLES: ''
+            }
+        })
+    });
+    var tiled = new ol.layer.Tile({
+        visible: true,
+        source: new ol.source.TileWMS({
+            url: 'http://localhost:8090/geoserver/test/wms',
+            params: {
+                'FORMAT': format,
+                'VERSION': '1.1.1',
+                tiled: true,
+                LAYERS: 'test:HenanCropStructure',
+                STYLES: '',
+                TRANSPARENT: false,
+
+            }
+        })
+    });
+    //地图显示边界
+    var bounds = [12242604.566453455, 3638067.2936184127, 13044997.331710687, 4400716.966806009];
+    var map = new ol.Map({
+        controls: ol.control.defaults({
+            attribution: false
+        }),
+        target: 'map',
+        layers: [
+            tian_di_tu_road_layer,
+            // untiled,
+            tiled,
+            tian_di_tu_annotation
+        ],
+        view: new ol.View({
+            //center:  [12242604.566453455,3638067.2936184127],//最小
+            // center:[12942604.566453455,4038067.2936184127],//选取中间值
+            //center:[13044997.331710687,4400716.966806009],//最大
+            //  center: ol.proj.transform([5, 31], 'EPSG:4326', 'EPSG:3857'),
+            zoom: 11
+        })
+    });
+    //显示全图需要 var bounds = [minX, minY, maxX, maxY];
+    map.getView().fit(bounds, map.getSize());
+
+
+    //-------------------覆盖物-------------------------------------------------------------------
+    //引用icon_red.png
+    var point_div = document.getElementById("marker");
+    var point_overlay = new ol.Overlay({
+        element: point_div,
+        positioning: 'bottom-left',
+        stopEvent: false
+    });
+    map.addOverlay(point_overlay);
+    point_overlay.setPosition([12242604.566453455, 3638067.2936184127]);
+    //引用闪烁原点动画
+    var point_div = document.getElementById("css_animation");
+    var point_overlay = new ol.Overlay({
+        element: point_div,
+        positioning: 'bottom-left',
+        stopEvent: false
+    });
+    map.addOverlay(point_overlay);
+    point_overlay.setPosition([11468382.41282299, 3502038.887913635]);
+</script>
+</body>
+</html> 

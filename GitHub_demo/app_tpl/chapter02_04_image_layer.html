@@ -1,0 +1,97 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>这个就是加载一张静态图在上面，其实没什么好看的</title>
+    <link rel="stylesheet" href="http://openlayers.org/en/v3.12.1/css/ol.css" type="text/css">
+    <style type="text/css">
+        body, #map {
+
+            padding: 0px;
+            width: 100%;
+            height: 100%;
+            font-size: 13px;
+        }
+    </style>
+
+    <script src="http://openlayers.org/en/v3.12.1/build/ol.js"></script>
+    <script type="text/javascript" src="jj.js"></script>
+</head>
+<body>
+<!--[if lt IE 10]>
+<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
+    your browser</a> to improve your experience.</p>
+<![endif]-->
+
+<div class="container">
+
+    include "header.html"
+
+    <h2>Image layer</h2>
+
+    <p>Show how you can load a static image and place within the map and integrate（整合） with other layers.</p>
+
+    Opacity: <input style='width: 80%;' class='opacity' type='text' data-slider-min='0' data-slider-max='1'
+                    data-slider-step='0.01' data-slider-tooltip='hide'>
+
+    <div id="map" class="map"></div>
+
+    <h4 class="text-muted">Source code:</h4>
+    <pre><code id="code_text" class="javascript"></code></pre>
+
+    include "footer.html"
+
+</div>
+
+include "tail.html"
+
+include "ganalytics.html"
+
+<script id="code">
+    // Create map
+    var map = new ol.Map({
+        target: 'map',  // The DOM element that will contains the map
+        renderer: 'canvas', // Force the renderer to be used
+        layers: [
+            // Add a new Tile layer getting tiles from OpenStreetMap source
+            new ol.layer.Tile({
+                source: new ol.source.OSM()
+            })
+        ],
+        // Create a view centered on the specified location and zoom level
+        view: new ol.View({
+            center: ol.proj.transform([-74.15655, 40.74222], 'EPSG:4326', 'EPSG:3857'),
+            zoom: 12
+        })
+    });
+
+    // Create an image layer
+    var imageLayer = new ol.layer.Image({
+        opacity: 0.75,
+        source: new ol.source.ImageStatic({
+            attributions: [//(attributions)归属
+                new ol.Attribution({
+                    html: '&copy; <a href="https://www.lib.utexas.edu/maps/historical/">University of Texas Libraries</a>'
+                })
+            ],
+            url: 'https://www.lib.utexas.edu/maps/historical/newark_nj_1922.jpg',
+            imageSize: [691, 541],//右击属性就行按顺序填写大小
+            projection: map.getView().getProjection(),//投影按照地图设定的投影
+            imageExtent: ol.extent.applyTransform([-74.22655, 40.71222, -74.12544, 40.77394], ol.proj.getTransform("EPSG:4326", "EPSG:3857"))
+        })
+    });
+
+    map.addLayer(imageLayer);
+
+    // Change layer opacity
+    $('input.opacity').slider({
+        value: imageLayer.getOpacity()
+    }).on('slide', function (ev) {
+        imageLayer.setOpacity(ev.value);
+    });
+</script>
+
+include "sourcecode.html"
+
+</body>
+</html>

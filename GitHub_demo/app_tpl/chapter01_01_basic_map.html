@@ -1,0 +1,49 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Ol3 wms</title>
+    <link rel="stylesheet" href="http://openlayers.org/en/v3.12.1/css/ol.css" type="text/css">
+    <style type="text/css">
+        body, #map {
+
+            padding: 0px;
+            width: 100%;
+            height: 50%;
+            font-size: 13px;
+        }
+    </style>
+
+    <script src="http://openlayers.org/en/v3.12.1/build/ol.js"></script>
+    <script type="text/javascript" src="jj.js"></script>
+</head>
+<body>
+
+
+<div id="map" class="map"></div>
+
+
+<script id="code">
+
+    var olLayer = new ol.layer.Tile({
+        source: new ol.source.OSM()
+    });
+
+    var map = new ol.Map({
+        target: 'map',
+        renderer: 'canvas',
+        layers: [
+
+            olLayer
+        ],
+
+        view: new ol.View({
+            center: ol.proj.transform([2.1833, 41.3833], 'EPSG:4326', 'EPSG:3857'),
+            zoom: 6
+        })
+    });
+</script>
+
+
+</body>
+</html>

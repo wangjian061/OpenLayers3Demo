@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <!-- <link rel="stylesheet" href="http://openlayers.org/en/v3.2.1/css/ol.css" type="text/css">-->
+</head>
+<body>
+<div id="map" class="map"></div>
+<link rel="stylesheet" href="http://openlayers.org/en/v3.12.1/css/ol.css" type="text/css">
+<script src="http://openlayers.org/en/v3.12.1/build/ol.js"></script>
+
+<script>
+    var map;
+    var vectorLayer;
+    var extentToZoom;
+    var geojsonObject;
+    function drawPolyline(geoObject) {
+        var image = new ol.style.Circle({
+            radius: 5,
+            fill: null,
+            stroke: new ol.style.Stroke({color: 'red', width: 1})
+        });
+        var styles = {
+            'greenRoute': new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'green',
+                    width: 3
+                })
+            }),
+            'redRoute': new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'red',
+                    width: 3
+                })
+            })
+        };
+        var styleFunction = function (feature, resolution) {
+            return styles[feature.get("fName")];
+        };
+        geojsonObject = geoObject;
+        var routeGeom = new ol.format.Polyline(
+                {
+                    factor: 1e6
+                }).readGeometry(geojsonObject.route_geometry, {
+            dataProjection: 'EPSG:4326',
+            featureProjection: 'EPSG:3857'
+        });
+        var colourRoute = ["greenRoute", "redRoute"]
+        var routeFeature = new ol.Feature({
+            geometry: routeGeom,
+            fName: colourRoute[Math.floor(Math.random() * colourRoute.length)]
+        })
+        console.log("color route" + colourRoute[Math.floor(Math.random() * colourRoute.length)]);
+        extentToZoom = routeGeom.getExtent();
+
+        var vectorSource = new ol.source.Vector({
+            features: [routeFeature]
+
+        });
+
+        //vectorSource.addFeature(new ol.Feature(new ol.geom.Circle([5e6, 7e6], 1e6)));
+
+        vectorLayer = new ol.layer.Vector({
+            source: vectorSource,
+            style: styleFunction
+        });
+        map.addLayer(vectorLayer);
+    }
+    function initMap() {
+        map = new ol.Map({
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.XYZ({
+                        urls: ["  http://a.tile.openstreetmap.fr/openriverboatmap/{z}/{x}/{y}.png", "  http://a.tile.openstreetmap.fr/openriverboatmap/{z}/{x}/{y}.png", "  http://a.tile.openstreetmap.fr/openriverboatmap/{z}/{x}/{y}.png"]
+
+                    })
+                })
+            ],
+            target: 'map',
+            controls: ol.control.defaults({
+                attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+                    collapsible: false
+                })
+            }),
+            view: new ol.View({
+                center: ol.proj.fromLonLat([103.986908, 1.353199]),
+                rotation: 68 * Math.PI / 180,
+                zoom: 18
+            })
+        });
+
+    }
+    function invokeAddMarker() {
+        var markerData = [
+            {
+                "title": 'point1',
+                "lat": 1.350664,
+                "lng": 103.985190,
+                "description": 'yyyy'
+            }, {
+                "title": 'point2',
+                "lat": 1.353604,
+                "lng": 103.986395,
+                "description": 'zzz'
+            }, {
+                "title": 'point3',
+                "lat": 1.357227,
+                "lng": 103.9879999,
+                "description": 'uuu'
+            }
+        ];
+        for (var i = 0; i < markerData.length; i++) {
+            addmarker(markerData[i].lat, markerData[i].lng);
+        }
+    }
+    function addmarker(lat, lng) {
+        console.log("*****lat******" + lat);
+        console.log("*****lng******" + lng);
+        var iconFeature = new ol.Feature({
+            geometry: new ol.geom.Point(ol.proj.transform([lng, lat], 'EPSG:4326', 'EPSG:3857')),
+            name: 'camera'
+        });
+        var iconStyle = new ol.style.Style({
+            image: new ol.style.Icon(({
+                anchor: [0.5, 46],
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'pixels',
+                opacity: 0.75,
+                src: 'camera.png'
+            }))
+        });
+        iconFeature.setStyle(iconStyle);
+        vectorSource = new ol.source.Vector({
+            features: [iconFeature]
+        });
+        /*t clear the markers*/
+        /*vectorSource.clear();*/
+        vectorLayer = new ol.layer.Vector({
+            source: vectorSource
+        });
+        map.addLayer(vectorLayer);
+        map.on('click', function (evt) {
+            var feature = map.forEachFeatureAtPixel(evt.pixel,
+                    function (feature, layer) {
+                        return feature;
+                    });
+            if (feature) {
+                alert("video comes here");
+
+            }
+
+        });
+    }
+    initMap();
+    invokeAddMarker();
+    geojsonObject = {
+        "status": 200,
+        "hint_data": {
+            "locations": ["1DYUCf____89vE8AWwAAANkCAAAAAAAAcAAAAG_vKABaqAAATqcUAIO1MgYAAAEB", "1DYUCf____89vE8AEAAAAHAAAADZAgAAAAAAAG_vKABaqAAAtZkUAPGvMgYBAAEB"],
+            "checksum": 4294707914
+        },
+        "route_name": ["T3 Arrival Drive", "T3 Arrival Drive"],
+        "status_message": "Found route between points",
+        "route_geometry": "{srqAewyieEzrExuAtDhA",
+        "via_indices": [0, 2],
+        "route_instructions": [["10", "T3 Arrival Drive", 418, 0, 2, "418m", "S", 202, 1, "N", 22], ["15", "", 0, 2, 0, "0m", "N", 0, "N", 0]],
+        "via_points": [[1.35355, 103.986563], [1.350069, 103.985137]],
+        "found_alternative": false,
+        "route_summary": {
+            "total_distance": 418,
+            "total_time": 65,
+            "end_point": "T3 Arrival Drive",
+            "start_point": "T3 Arrival Drive"
+        }
+    };
+    drawPolyline(geojsonObject);
+    var geoobject2 = {
+        "status": 200,
+        "hint_data": {
+            "locations": ["UiQkCf____-ljiMAEAAAABgAAAAAAAAAAAAAAP____-jqAAAt5gUAG2wMgYAAAEB", "c8gaCf____8AAAAAMgAAALAAAAAAAAAAHQEAAOviEAajqAAAdqQUABy3MgYAAAEB"],
+            "checksum": 4089551480
+        },
+        "route_name": ["East Coast Parkway (ECP)", ""],
+        "status_message": "Found route between points",
+        "route_geometry": "mjkqAyewieEsHuB_m@qWoYwJuDoDoAqBoFaJkCsD}H_Hai@{Pw`@iM",
+        "via_indices": [0, 10],
+        "route_instructions": [["10", "East Coast Parkway (ECP)", 18, 0, 2, "18m", "N", 21, 1, "S", 201], ["1", "", 308, 1, 24, "307m", "NE", 28, 1, "SW", 208], ["1", "", 65, 9, 5, "65m", "NE", 23, 1, "SW", 203], ["15", "", 0, 10, 0, "0m", "N", 0, "N", 0]],
+        "via_points": [[1.349815, 103.985261], [1.352822, 103.986972]],
+        "found_alternative": false,
+        "route_summary": {
+            "total_distance": 391,
+            "total_time": 29,
+            "end_point": "",
+            "start_point": "East Coast Parkway (ECP)"
+        }
+    };
+    drawPolyline(geoobject2);
+    var geoobject3 = {
+        "status": 200,
+        "hint_data": {
+            "locations": ["NksUCf_____CwU8AzwAAABMBAAAAAAAAHQEAAG0BpwavqAAARaEUAOmxMgYAAAEB", "R0sUCf_____CwU8AZgAAAPQAAADtAAAAKwIAAKQJ8QSvqAAAebIUAGy5MgYBAAEB"],
+            "checksum": 3361836982
+        },
+        "route_name": ["T3 Departure Drive", "T3 Departure Drive"],
+        "status_message": "Found route between points",
+        "route_geometry": "isoqAq}wieEqUiHqpA__@cLkE}NgJyGaDiTmGemAk`@w`@kM",
+        "via_indices": [0, 8],
+        "route_instructions": [["10", "T3 Departure Drive", 535, 0, 81, "535m", "N", 22, 1, "S", 202], ["15", "", 0, 8, 0, "0m", "N", 0, "N", 0]],
+        "via_points": [[1.352005, 103.985641], [1.356409, 103.987564]],
+        "found_alternative": false,
+        "route_summary": {
+            "total_distance": 535,
+            "total_time": 84,
+            "end_point": "T3 Departure Drive",
+            "start_point": "T3 Departure Drive"
+        }
+    };
+    drawPolyline(geoobject3);
+    map.getView().fit(extentToZoom, map.getSize())
+</script>
+
+</body>
+</html>

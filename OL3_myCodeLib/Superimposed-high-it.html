@@ -1,0 +1,321 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>叠加图、四点多边形样式高亮叠加区域 </title>
+    <link rel="stylesheet" href="http://openlayers.org/en/v3.12.1/css/ol.css" type="text/css">
+    <script src="http://openlayers.org/en/v3.12.1/build/ol.js"></script>
+    <script type="text/javascript" src="jj.js"></script>
+    <style type="text/css">
+        #map {
+
+            width: 100%;
+            height: 50%;
+            font-size: 13px;
+        }
+
+        .item {
+            width: 30px;
+            height: 10px;
+        }
+
+    </style>
+
+</head>
+<body onload="init()">
+<div>
+
+    <button onclick="superimosedHeNan()">实验地图是否刷新</button>
+    <button onclick="addPolygon()">添加一个多边形</button>
+
+</div>
+<div id="map">
+
+    <div class="listColor " style="position: absolute;z-index:1;right: 0;padding-left: 20px;padding-top: 50px ">
+        <ul>
+            <li>
+                <input type="text" id="xiaomai" class="item" style="background-color: blue"> 小麦(天地图路网)
+            </li>
+            <li>
+                <input type="text" id="dadou" class="item" style="background-color: red"> 大豆（天地图文字）
+            </li>
+            <li>
+                <input type="text" id="yumi" class="item" style="background-color: yellow"> 玉米（河南wms层）
+            </li>
+            <li>
+                <input type="text" id="gaoliang" class="item" style="background-color: pink"> 高粱（中国边界）
+            </li>
+            <li>
+                <input type="text" class="item" style="background-color: green"> 水稻
+            </li>
+        </ul>
+    </div>
+
+</div>
+
+
+<script id="code">
+    //参数设置
+    var format = 'image/png';
+    var projection = new ol.proj.Projection({
+        code: 'EPSG:32649',
+        units: 'm',
+        axisOrientation: 'neu'
+    });
+    //地图显示边界
+    var bounds = [12242604.566453455, 3638067.2936184127, 13044997.331710687, 4400716.966806009];
+    var map;
+    var tian_di_tu_road_layer;
+    var tian_di_tu_annotation;
+    var baise_image;
+    var baise_tile;
+    var layerImage_China;
+    var layerTile_Chinna;
+    var layerImage_HeNan;
+
+    function init() {
+        loadWMS();
+        initMap();
+    }
+
+    function loadWMS() {
+        //加载天地图服务
+        tian_di_tu_road_layer = new ol.layer.Tile({
+            title: "天地图路网",
+            source: new ol.source.XYZ({
+                //     url: "http://t4.tianditu.com/DataServer?T=vec_w&x={x}&y={y}&l={z}"
+                url: "http://t3.tianditu.com/DataServer?T=img_w&x={x}&y={y}&l={z}"
+            }),
+            visible: true
+        });
+        tian_di_tu_annotation = new ol.layer.Tile({
+            title: "天地图文字标注",
+            source: new ol.source.XYZ({
+                url: 'http://t3.tianditu.com/DataServer?T=cva_w&x={x}&y={y}&l={z}'
+            }),
+            visible: true
+        });
+
+        //百色地图
+        baise_image = new ol.layer.Image({
+            source: new ol.source.ImageWMS({
+                ratio: 1,
+                url: 'http://localhost:8080/geoserver/wangjian/wms',
+                params: {
+                    'FORMAT': format,
+                    'VERSION': '1.1.1',
+                    STYLES: '',
+                    LAYERS: 'wangjian:TwoClasses_new55_CGCS2000',
+                }
+            })
+        });
+        baise_tile = new ol.layer.Tile({
+            visible: false,
+            source: new ol.source.TileWMS({
+                url: 'http://localhost:8080/geoserver/wangjian/wms',
+                params: {
+                    'FORMAT': format,
+                    'VERSION': '1.1.1',
+                    tiled: true,
+                    STYLES: '',
+                    LAYERS: 'wangjian:TwoClasses_new55_CGCS2000',
+                }
+            })
+        });
+
+        //从GS加载WMS服务 shape（中国地图边界WMS层）
+        layerImage_China = new ol.layer.Image({
+            source: new ol.source.ImageWMS({
+                ratio: 1,
+                url: 'http://localhost:8080/geoserver/wangjian/wms',
+                params: {
+                    'FORMAT': format,
+                    'VERSION': '1.1.1',
+                    LAYERS: 'wangjian:shengsheng',
+                    STYLES: '',
+                    visible: true
+                }
+            })
+        });
+        layerTile_Chinna = new ol.layer.Tile({
+            visible: true,
+            source: new ol.source.TileWMS({
+                url: 'http://localhost:8080/geoserver/wangjian/wms',
+                params: {
+                    'FORMAT': format,
+                    'VERSION': '1.1.1',
+                    tiled: true,
+                    LAYERS: 'wangjian:shengsheng',
+
+                    TRANSPARENT: true,
+                    visible: true
+
+                }
+            })
+        });
+
+    }
+
+    function initMap() {
+         map = new ol.Map({
+            controls: ol.control.defaults({
+                attribution: false
+            }),
+            target: 'map',
+            layers: [
+                //  tian_di_tu_road_layer,
+                layerTile_Chinna,
+                tian_di_tu_annotation,
+            ],
+            view: new ol.View({
+                //center:  [12242604.566453455,3638067.2936184127],//最小
+                // center:[12942604.566453455,4038067.2936184127],//选取中间值
+                //center:[13044997.331710687,4400716.966806009],//最大
+                //  center: ol.proj.transform([5, 31], 'EPSG:4326', 'EPSG:3857'),
+                zoom: 11
+            })
+        });
+        //显示全图需要 var bounds = [minX, minY, maxX, maxY];
+        map.getView().fit(bounds, map.getSize());
+    }
+
+    function addPolygon() {
+        //百色市
+        //var minX = "104.44587240061686";
+        //var maxX = "107.92154145173909";
+        //var minY = "22.839007263886113";
+        //var maxY = "25.112868468185084";
+        // 根据坐标画多边形
+        var overlayStyle = new ol.style.Style({
+            stroke: new ol.style.Stroke({//设置边线颜色和粗细
+                color: '#FF4040',
+                width: 3
+            }),
+            fill: new ol.style.Fill({//设置围成的多边形的填充色
+                color: 'rgba(255,255,255,0)'
+            }),
+            text: new ol.style.Text({//设置文字颜色暂时不用
+                font: '12px Calibri,sans-serif',
+                //text: text,
+                fill: new ol.style.Fill({
+                    color: '#000'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: '#f00',
+                    width: 30
+                })
+            })
+        })
+        var polyCoords = [];
+        var minX = "109.97718799476587";
+        var maxX = "117.18520484374086";
+        var minY = "31.0409413066997";
+        var maxY = "36.72408289756227";
+        var coords = (minX + "," + minY + " " + maxX + "," + minY + " " + maxX + "," + maxY + " " + minX + "," + maxY).split(' ');
+        for (var i in coords) {
+            var c = coords[i].split(',');
+            polyCoords.push(ol.proj.transform([parseFloat(c[0]), parseFloat(c[1])], 'EPSG:4326', 'EPSG:3857'));
+        }
+        var feature = new ol.Feature({
+            geometry: new ol.geom.Polygon([polyCoords])
+        })
+        var layer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                features: [feature]
+            }),
+            style: overlayStyle
+        });
+        map.addLayer(layer);
+
+    }
+
+    function superimosedHeNan() {
+        //从GS加载WMS服务（河南WMS层）
+        layerImage_HeNan = new ol.layer.Image({
+            source: new ol.source.ImageWMS({
+                ratio: 1,
+                url: 'http://localhost:8080/geoserver/wangjian/wms',
+                params: {
+                    'FORMAT': format,
+                    'VERSION': '1.1.1',
+                    LAYERS: 'wangjian:HenanCropStructure',
+                    STYLES: '',
+                    visible: true
+                }
+            })
+        });
+
+        var layerTile_HeNan = new ol.layer.Tile({
+            visible: true,
+            source: new ol.source.TileWMS({
+                url: 'http://localhost:8080/geoserver/wangjian/wms',
+                params: {
+                    'FORMAT': format,
+                    'VERSION': '1.1.1',
+                    tiled: true,
+                    LAYERS: 'wangjian:HenanCropStructure',
+                    STYLES: '',
+                    TRANSPARENT: true,
+                    visible: true
+
+                }
+            })
+        });
+        map.addLayer(layerImage_HeNan);
+        map.addLayer(layerTile_HeNan);
+    }
+
+    function addLayerToMap(url_WMS, name_layer) {
+        var layerTile_HeNan = new ol.layer.Tile({
+            visible: true,
+            source: new ol.source.TileWMS({
+                url: url_WMS,
+                params: {
+                    'FORMAT': format,
+                    'VERSION': '1.1.1',
+                    tiled: true,
+                    LAYERS: name_layer,
+                    STYLES: '',
+                    TRANSPARENT: true,
+                    visible: true
+
+                }
+            })
+        });
+        map.addLayer(name_layer);
+    }
+
+    function addmarker(lat, lng) {
+
+        var iconFeature = new ol.Feature({
+            //注意如果是4326的坐标请启用下面的这个方法，直接用的3857的方法应下下面的
+            // geometry: new ol.geom.Point(ol.proj.transform([lng,lat],'EPSG:4326', 'EPSG:3857')),
+            geometry: new ol.geom.Point([lat, lng]),
+            // 此处设置了一个name可以作为识别marker的一个标志
+            name: 'camera'
+        });
+
+        var iconStyle = new ol.style.Style({
+            image: new ol.style.Icon(({
+                anchor: [0, 0],//注意地图上的偏数回很大，参数0可以为小数
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'pixels',
+                opacity: 1,
+                src: 'data/icon.png'//确认你的文件下有这个icon图标
+            }))
+        });
+        iconFeature.setStyle(iconStyle);
+        var vectorSource = new ol.source.Vector({
+            features: [iconFeature]
+        });
+
+        vectorLayer = new ol.layer.Vector({
+            source: vectorSource
+        });
+        map.addLayer(vectorLayer);
+    }
+
+</script>
+
+</body>
+</html>

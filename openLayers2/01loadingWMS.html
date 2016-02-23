@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'/>
+    <style>
+        html, body {
+            height: 99%;
+            width: 99%;
+        }
+
+        #map {
+            width: 698px;
+            height: 330px;
+            border: 1px solid black;
+        }
+
+        /* General settings */
+        body {
+            font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+            font-size: small;
+        }
+
+        /* Toolbar styles */
+        #toolbar {
+            position: relative;
+            padding-bottom: 0.5em;
+
+        }
+    </style>
+    <title>访问Geoserver发布的地图</title>
+
+    <script type='text/javascript' src='OpenLayers.js'></script>
+    <script type='text/javascript'>
+        var map;
+
+        function init() {
+            //定义地图边界
+            var bounds = new OpenLayers.Bounds(75.98585510253906, 18.23404312133789,
+                    131.15216064453125, 50.426963806152344);
+            var options = {
+                projection: "EPSG:4326",
+                center: new OpenLayers.LonLat(116.5, 39.5),
+            };
+            map = new OpenLayers.Map('map_element', options);
+
+
+            //加载geoserver WMS服务
+            //http://127.0.0.1:8090/geoserver/test/wms
+            // ?service=WMS&version=1.1.0&request=GetMap&
+            // layers=test:HenanCropStructure&
+            // styles=&
+            // bbox=408660.0,3448620.0,1053780.0,4064280.0&
+            // width=768&height=732&srs=
+            // EPSG:32649
+            // &format=application/openlayers#
+            // My layer
+
+            var wms = new OpenLayers.Layer.WMS("OpenLayers WMS",
+                    //geoserver所在服务器地址
+                    "http://127.0.0.1:8090/geoserver/test/wms",
+                    {
+                        layers: "test:HenanCropStructure"
+                    });
+            //添加wms图层
+            map.addLayer(wms);
+
+            //添加control空间
+            map.addControl(new OpenLayers.Control.LayerSwitcher());
+            map.addControl(new OpenLayers.Control.MousePosition());
+            map.addControl(new OpenLayers.Control.ScaleLine());
+            map.addControl(new OpenLayers.Control.Scale);
+            map.zoomToMaxExtent(bounds);
+        }
+
+
+    </script>
+
+</head>
+
+<body onload='init();'>
+<div style="position: absolute; top: 50px; left: 80px; width: 300px; height: 100px;">
+    <div id='map_element' style='width:1200px;height:500px;'></div>
+
+</div>
+</body>
+</html>

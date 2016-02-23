@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="keywords" content="天地图"/>
+    <title>天地图－地图API－范例－比例尺控件</title>
+    <script type="text/javascript" src="http://api.tianditu.com/js/maps.js"></script>
+    <script>
+        var map;
+        var zoom = 12;
+        function onLoad()
+        {
+            //初始化地图对象
+            map=new TMap("mapDiv");
+            //设置显示地图的中心点和级别
+            map.centerAndZoom(new TLngLat(116.40969,39.89945),zoom);
+            //允许鼠标滚轮缩放地图
+            map.enableHandleMouseScroll();
+            //创建比例尺控件对象
+            var scale = new TScaleControl();
+            //添加比例尺控件
+            map.addControl(scale);
+        }
+    </script>
+</head>
+<body onLoad="onLoad()">
+<div id="mapDiv" style="position:absolute;width:600px; height:500px"></div>
+<div style="position:absolute;left:620px;">
+    <ul>
+        <li>本示例演示如何向地图上增加比例尺控件。</li>
+        <p><a href="http://api.tianditu.com/api-new/examples.html">返回所有范例列表</a></p>
+    </ul>
+</div>
+</body>
+</html>

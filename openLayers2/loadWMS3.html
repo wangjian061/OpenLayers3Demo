@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>基本地图</title>
+    <link rel="stylesheet" href="http://openlayers.org/en/v3.12.1/css/ol.css" type="text/css">
+    <script src="http://openlayers.org/en/v3.12.1/build/ol.js"></script>
+</head>
+<body>
+<div id="map" style="width: 100%;height: 400px"></div>
+<script>
+    new ol.Map({
+        layers: [
+            new ol.layer.Tile({source: new ol.source.OSM()})
+        ],
+        view: new ol.View({
+            center: [0, 0],
+            zoom: 2
+        }),
+        target: 'map'
+    });
+</script>
+</body>
+</html>
+
+//加载geoserver WMS服务
+//http://127.0.0.1:8090/geoserver/test/wms
+// ?service=WMS&version=1.1.0&request=GetMap&
+// layers=test:HenanCropStructure&
+// styles=&
+// bbox=408660.0,3448620.0,1053780.0,4064280.0&
+// width=768&height=732&srs=
+// EPSG:32649
+// &format=application/openlayers#
+// My layer
+//var map = new OpenLayers.Map('map');
+
+
+
+
+
+

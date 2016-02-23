@@ -1,0 +1,110 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>添加删除层layer</title>
+    <link rel="stylesheet" href="http://openlayers.org/en/v3.12.1/css/ol.css" type="text/css">
+    <style type="text/css">
+        body, #map {
+
+            padding: 0px;
+            width: 100%;
+            height: 50%;
+            font-size: 13px;
+        }
+    </style>
+
+    <script src="http://openlayers.org/en/v3.12.1/build/ol.js"></script>
+    <script type="text/javascript" src="jj.js"></script>
+</head>
+<body>
+<!--[if lt IE 10]>
+<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade升级
+    your browser</a> to improve提升 your experience经验.</p>
+<![endif]-->
+
+<div class="container">
+
+    include "header.html"
+
+    <h2>Adding and removing layers</h2>
+
+    <p>Show how we can programmatically add and remove layer to/from the map.show给我们编程（programmatically）去添加移除层</p>
+
+    <div style="margin-top: 5px;" class="alert alert-success">Note the map has been initialized without layers. You can
+        add or remove any of the below layers.map排序后你可以对他上面的各层进行操作
+    </div>
+
+    <hr/>
+
+    <div class="row">
+        <div class="col-md-2 example">
+            OpenStreetMap<br/>
+            <button id="addOSM" class="btn btn-primary btn-xs">Add</button>
+            <button id="removeOSM" class="btn btn-danger btn-xs">Remove</button>
+        </div>
+
+        <div class="col-md-2 example">
+            MapQuest<br/>
+            <button id="addMQ" class="btn btn-primary btn-xs">Add</button>
+            <button id="removeMQ" class="btn btn-danger btn-xs">Remove</button>
+        </div>
+    </div>
+
+    <div id="map" class="map"></div>
+
+    <h4 class="text-muted">Source code:</h4>
+    <pre><code id="code_text" class="javascript"></code></pre>
+
+    include "footer.html"
+
+</div>
+
+include "tail.html"
+
+include "ganalytics.html"
+
+<script id="code">
+    var map = new ol.Map({
+        target: 'map',  // The DOM element that will contains the map
+        renderer: 'canvas', // Force the renderer to be used
+        layers: [],     // Initially empty map
+        // Create a view centered on the specified location and zoom level
+        view: new ol.View({
+            center: ol.proj.transform([2.1833, 41.3833], 'EPSG:4326', 'EPSG:3857'),
+            zoom: 6
+        })
+    });
+
+    // Create two layers but let user add them to the map
+    var layerOSM = new ol.layer.Tile({
+        source: new ol.source.OSM()
+    });
+
+    var layerMQ = new ol.layer.Tile({
+        source: new ol.source.MapQuest({
+            layer: 'osm'
+        })
+    });
+
+    $(document).ready(function () {
+        //你妹看到这里发现这个demo真是太他妈废柴了屁用没有
+        $('#addOSM').on('click', function () {
+            map.addLayer(layerOSM);
+        });
+        $('#removeOSM').on('click', function () {
+            map.removeLayer(layerOSM);
+        });
+        $('#addMQ').on('click', function () {
+            map.addLayer(layerMQ);
+        });
+        $('#removeMQ').on('click', function () {
+            map.removeLayer(layerMQ);
+        });
+    });
+</script>
+
+include "sourcecode.html"
+
+</body>
+</html>

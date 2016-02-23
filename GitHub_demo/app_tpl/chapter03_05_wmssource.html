@@ -1,0 +1,123 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    include "head.html"
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>wmts(OpenGIS Web Map Tile Service 地图切片服务) sorrce </title>
+    <link rel="stylesheet" href="http://openlayers.org/en/v3.12.1/css/ol.css" type="text/css">
+    <style type="text/css">
+        body, #map {
+
+            padding: 0px;
+            width: 100%;
+            height: 50%;
+            font-size: 13px;
+        }
+    </style>
+
+    <script src="http://openlayers.org/en/v3.12.1/build/ol.js"></script>
+    <script type="text/javascript" src="jj.js"></script>
+</head>
+<body>
+<!--[if lt IE 10]>
+<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
+    your browser</a> to improve your experience.</p>
+<![endif]-->
+
+<div class="container">
+
+    include "header.html"
+
+    <h2>Loading data from a WMS server </h2>
+
+    <p>此示例演示如何可以请求WMS服务器上的栅格数据。左侧请求数据作为整个视图程度的单个图像在地图上。右侧的地图可以作为瓦片的金字塔。 <em>single image</em> for the whole view extent.
+        The map on the right works as a pyramid of tiles.</p>
+
+    <div class="row">
+        <div id="mapImage" class="map col-sm-6"></div>
+        <div id="mapTiles" class="map col-sm-6"></div>
+    </div>
+
+    <h4 class="text-muted">Source code:</h4>
+    <pre><code id="code_text" class="javascript"></code></pre>
+
+    include "footer.html"
+
+</div>
+
+include "tail.html"
+
+include "ganalytics.html"
+
+
+<script id="code">
+    var imageLayer = new ol.layer.Image({
+        source: new ol.source.ImageWMS({
+            url: 'http://www.idee.es/wms/MTN-Raster/MTN-Raster',
+            ratio: 1,
+            params: {
+                'LAYERS': 'mtn_rasterizado',
+                'TRANSPARENT': 'true'
+            }
+        })
+    });
+    var mapImage = new ol.Map({
+        target: 'mapImage',  // The DOM element that will contains the map
+        renderer: 'canvas', // Force the renderer to be used
+        layers: [
+            new ol.layer.Tile({
+                source: new ol.source.OSM()
+            }),
+            imageLayer
+        ],
+        // Create a view centered on the specified location and zoom level
+        view: new ol.View({
+            center: ol.proj.transform([2.1833, 41.3833], 'EPSG:4326', 'EPSG:3857'),
+            zoom: 6
+        })
+    });
+    // var format = 'image/png';
+    // var bounds = [73.4510046356223, 18.1632471876417,
+    //134.976797646506, 53.5319431522236];
+
+    <!--地址以及所有参数-->
+    //http://localhost:8090/geoserver/test/wms
+    // service=WMS
+    // version=1.1.0
+    // request=GetMap
+    // layers=test:HenanCropStructure
+    // styles=
+    // bbox=408660.0,3448620.0,1053780.0,4064280.0
+    // width=768&height=732
+    // srs=EPSG:32649
+    // format=application/openlayers
+    var wmslayer = new ol.source.TileWMS({
+        url: 'http://localhost:8090/geoserver/test/wms',
+        params: {
+            'LAYERS': 'test:HenanCropStructure',
+            'TRANSPARENT': 'true'
+        }
+    });
+    var mapTiles = new ol.Map({
+        target: 'mapTiles',  // The DOM element that will contains the map
+        renderer: 'canvas', // Force the renderer to be used
+        layers: [
+            new ol.layer.Tile({
+                source: new ol.source.OSM()
+            }),
+            new ol.layer.Tile({
+                source: wmslayer
+            })
+        ],
+        // Create a view centered on the specified location and zoom level
+        view: new ol.View({
+            center: ol.proj.transform([2.1833, 41.3833], 'EPSG:4326', 'EPSG:3857'),
+            zoom: 6
+        })
+    });
+</script>
+
+include "sourcecode.html"
+
+</body>
+</html>

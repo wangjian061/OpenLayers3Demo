@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+    <style type="text/css">
+        body, html, #allmap {
+            width: 100%;
+            height: 80%;
+            overflow: hidden;
+            margin: 0;
+            font-family: "微软雅黑";
+        }
+    </style>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=kb7nIpa9yaIWZ769oK9rAFAq"></script>
+    <!--jq引用-->
+    <script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+    <title>给多个点添加信息窗口</title>
+</head>
+
+<body>
+<div id="allmap"></div>
+<div>
+    <button onclick="addMarkerAndPanTo(creatPoint(113.408,39.920))">增加站点</button>
+</div>
+<div>
+    <button onclick="dialog">dialog</button>
+</div>
+</body>
+
+</html>
+<script type="text/javascript">
+    // 百度地图API功能
+    var map = new BMap.Map("allmap");    // 创建Map实例
+    map.centerAndZoom(new BMap.Point(116.404, 39.915), 11);  // 初始化地图,设置中心点坐标和地图级别
+
+    map.addControl(new BMap.MapTypeControl());   //添加地图类型控件
+    map.setCurrentCity("北京");          // 设置地图显示的城市 此项是必须设置的
+    map.enableScrollWheelZoom(true);     //缩放
+    add_control();
+
+
+    //添加20个点
+    for (var i = 0; i < 20; i++) {
+        var point = new BMap.Point(116.404, 39.915 + i);
+        addMarker(point);
+    }
+
+
+    //创建坐标点
+    function creatPBoint(a, b) {
+        var mPoint = new BMap.Point(a, b);
+        return mPoint;
+    }
+
+    //得到行政区划
+    function getMarkerAddress(x, y, callback) {
+        var mAddress = null;
+        var myGeo = new BMap.Geocoder();// 创建地理编码实例
+
+        myGeo.getLocation(new BMap.Point(x, y), function (result) {
+                    if (result) {
+                        //mAddress = result.address;
+                        var addComp = result.addressComponents;
+                        mAddress = addComp.province + ", " + addComp.city + ", " + addComp.district + ", " + addComp.street + ", " + addComp.streetNumber;
+                        callback(mAddress);
+                    }
+                }
+        );
+    }
+
+
+    //更具具体某个坐标得到行政区划
+    function getMarkerAddresOfOnePoint(x, y) {
+
+        var mAddress = null;
+        var myGeo = new BMap.Geocoder();// 创建地理编码实例
+
+        myGeo.getLocation(new BMap.Point(x, y), function (result) {
+                    if (result) {
+                        //mAddress = result.address;
+                        var addComp = result.addressComponents;
+                        mAddress = addComp.province + ", " + addComp.city + ", " + addComp.district + ", " + addComp.street + ", " + addComp.streetNumber;
+                        //前端的input获取显示值
+                    }
+                }
+        );
+    }
+
+
+    // 添加-Marker
+    function addMarker(point) {
+        var marker = new BMap.Marker(point);
+        map.addOverlay(marker);
+        getMarkerAddress(marker.getPosition().lng, marker.getPosition().lat, function (markerAddress) {
+            addClickHandler("行政区划：" + markerAddress + getAttr(marker), marker);//弹窗事件
+        })
+
+    }
+
+    // 添加-Marker 并且 平移动画
+    function addMarkerAndPanTo(point) {
+        var marker = new BMap.Marker(point);
+        map.addOverlay(marker);
+        getMarkerAddress(marker.getPosition().lng, marker.getPosition().lat, function (markerAddress) {
+            addClickHandler("行政区划：" + markerAddress + getAttr(marker), marker);//弹窗事件
+        })
+        marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+        resetMapCenter();
+    }
+
+    // 彻底删除 Marker
+    function deleteMarker(marker) {
+        map.removeOverlay(marker);
+        marker.dispose();
+    }
+
+
+    // 获取覆盖物坐标信息
+    function getAttr(marker) {
+        var p = marker.getPosition();
+        var attrMessage = "经纬度：" + p.lng + "," + p.lat;
+        return attrMessage;
+    }
+
+    // 添加控件和比例尺
+    function add_control() {
+        var top_left_control = new BMap.ScaleControl({anchor: BMAP_ANCHOR_TOP_LEFT});
+        var top_left_navigation = new BMap.NavigationControl();
+        var top_right_navigation = new BMap.NavigationControl({
+            anchor: BMAP_ANCHOR_TOP_RIGHT,
+            type: BMAP_NAVIGATION_CONTROL_SMALL
+        });
+        map.addControl(top_left_control);
+        map.addControl(top_left_navigation);
+        //map.addControl(top_right_navigation);
+    }
+
+    // 平移定位
+    function resetMapCenter() {
+        setTimeout(function () {
+            map.panTo(new BMap.Point(113.408, 39.920));
+        }, 2000);
+
+    }
+    // Marker 添加弹窗事件
+    function addClickHandler(content, marker) {
+        marker.addEventListener("click", function (e) {
+                    openInfo(content, e)
+                }
+        );
+    }
+
+
+    // 弹窗方法2
+    function openInfo(content, e) {
+        var opts = {
+            width: 250,
+            height: 200,
+            title: "信息窗口",
+            enableMessage: true
+        };
+        var p = e.target;
+        var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+        var infoWindow = new BMap.InfoWindow(content, opts);
+        map.openInfoWindow(infoWindow, point);
+    }
+
+
+    // 弹窗方法1
+    function showWindow(content, marker) {
+        var opts = {
+            width: 250,
+            height: 200,
+            title: "基站信息详情"
+        }
+        var infoWindow = new BMap.InfoWindow(content, opts);  // 创建信息窗口对象
+        map.openInfoWindow(infoWindow, marker.getPoint());      // 打开信息窗口
+    }
+</script>

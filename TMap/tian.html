@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        .infotdname {
+            font-weight: bold;
+            height: 20px;
+            text-align: left;
+        }
+
+        .infotddata {
+            text-align: left;
+
+            word-break: break-all;
+        }
+
+        .esriPopupWrapper {
+            border-radius: 5px;
+            box-shadow: 0 0 0.75em #777777;
+        }
+
+        table, td, input, textarea {
+            font-size: 12px;
+        }
+    </style>
+    <script type="text/javascript" src="http://api.tianditu.com/js/maps.js"></script>
+    <script>
+        var map, mapmousemove;
+        var zoom = 5;
+
+        function onload() {//加载地图
+            var config = {
+                projection: "EPSG:4326",
+
+            }
+            map = new TMap("map1", "config");
+            map.enableHandleMouseScroll();
+            map.setMapCursor("pointer");
+
+            var zoomInObj = document.getElementById("zoomIn");
+            var delete1 = document.getElementById("delete");
+
+            var zengjia = new THtmlElementControl(zoomInObj);
+            var shanchu = new THtmlElementControl(delete1);
+
+            zengjia.setTop(1);
+            zengjia.setRight(1);
+            map.addControl(zengjia);
+            shanchu.setTop(30);
+            shanchu.setRight(1);
+            map.addControl(shanchu);
+
+            //地图添加Marker工具
+            addMarkerTool = new TMarkTool(map);
+            addMarkerTool.setPointImage("data/icon_red.png");
+            addMarkerTool.close();//默认关闭
+            addMarkerTool.getMarkControlPoint();//获得坐标
+
+            mapmousemove = TEvent.addListener(map, "mousemove", function (p) {
+                var lnglat = map.fromContainerPixelToLngLat(p);
+                document.getElementById("info").value = lnglat.getLng() + "," + lnglat.getLat();
+            });
+
+
+            TEvent.addListener(addMarkerTool, "mouseup", addMarker);
+            map.centerAndZoom(new TLngLat(116.40969, 39.89945), zoom);
+
+            deleteMarkerTool = new TMarkTool(map);
+            deleteMarkerTool.close();
+            TEvent.addListener(deleteMarkerTool, "mouseup", deleteMarker);
+
+        }
+
+
+        function addMarker(point) {//增加坐标
+
+            marker = new TMarker(point);
+            marker.setIconImage("data/icon_red.png");
+            map.addOverLay(marker);
+            addMarkerTool.close();
+        }
+
+        function deleteMarker() {//删除坐标
+            map.removeOverLay(marker);
+            deleteMarkerTool.close();
+        }
+
+        function showWindow(mMarker,windowContent, mTitle, heightNum) {//弹窗
+
+            var mLngLat=getMarkerLngLat(mMarker)
+            var infoWin = new TInfoWindow(mLngLat, new TPixel([0, -34]));
+            infoWin.setLabel(windowContent);
+            infoWin.setTitle(mTitle);
+            infoWin.setHeight(heightNum);
+            map.addOverLay(infoWin);
+        }
+
+        function getMarkerLngLat(mMarker) {//获得坐标集
+            var mLngLat = new TLngLat(mMarker.getLngLat().getLng(), mMarker.getLngLat().getLat());
+            return mLngLat;
+        }
+
+        function setWindowContent() {//弹窗详细
+            var content =
+                    "<div >" +
+                    "<div style='font-size:13px;'>" +
+                    "<table>" +
+                    "<tr>" +
+                    "<td>" + "经度：" + "</td>" +
+                    "<td>" + mLngLat.getLng() + "</td>" +
+                    "<td>" + "经度：" + "</td>" +
+                    "<td>" + mLngLat.getLat() + "</td>" +
+                    "</tr>" +
+                    "<tr>" +
+                    "<td>" + "站点名称：" + "</td>" +
+                    "<td>" + "<input type='text' />" + "</td>" +
+                    "<td>" + "</td>" +
+                    "<td>" + "</td>" +
+                    "</tr>" +
+                    "<tr>" +
+                    "<td>" + "所在道路：" + "</td>" +
+                    "<td>" + "</td>" +
+                    "<td>" + "</td>" +
+                    "<td>" + "</td>" +
+                    "</tr>" +
+                    "</table>" +
+                    "</div>" +
+                    "</div>"
+            return content;
+
+        }
+
+    </script>
+</head>
+<body onload="onload()">
+当前坐标：
+<input type="text" id="info" value=""/>
+<div id="map1" style="width:90%;height:600px;"></div>
+<div id="zoomIn" style="font-size:12px;background:#fff;padding:2px;line-height:30px;cursor:pointer;"
+     onclick="addMarkerTool.open();">增加站点
+</div>
+
+
+
+
+</body>
+</html>

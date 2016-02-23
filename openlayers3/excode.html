@@ -1,0 +1,83 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Ol3 wms</title>
+    <link rel="stylesheet" href="http://openlayers.org/en/v3.12.1/css/ol.css" type="text/css">
+    <style type="text/css">
+        body, #map {
+
+            padding: 0px;
+            width: 100%;
+            height: 100%;
+            font-size: 13px;
+        }
+    </style>
+
+    <script src="http://openlayers.org/en/v3.12.1/build/ol.js"></script>
+    <script type="text/javascript" src="jj.js"></script>
+
+
+    <script type="text/javascript">
+        function init() {
+            var format = 'image/png';
+            var bounds = [408660, 3448620, 1053780, 4064280];
+            var projection = new ol.proj.Projection({
+                code: 'EPSG:32649',
+                units: 'm',
+                axisOrientation: 'neu'
+            });
+            var basic = new ol.layer.Tile({
+                source: new ol.source.OSM()
+            });
+            var untiled = new ol.layer.Image({
+                source: new ol.source.ImageWMS({
+                    ratio: 1,
+                    url: 'http://localhost:8090/geoserver/test/wms',
+                    params: {
+                        'FORMAT': format,
+                        'VERSION': '1.1.1',
+                        LAYERS: 'test:HenanCropStructure',
+                        STYLES: ''
+                    }
+                })
+            });
+            var tiled = new ol.layer.Tile({
+                visible: true,
+                source: new ol.source.TileWMS({
+                    url: 'http://localhost:8090/geoserver/test/wms',
+                    params: {
+                        'FORMAT': format,
+                        'VERSION': '1.1.1',
+                        tiled: true,
+                        LAYERS: 'test:HenanCropStructure',
+                        STYLES: ''
+                    }
+                })
+            });
+
+            var map = new ol.Map({
+                controls: ol.control.defaults({
+                    attribution: false
+                }),
+                target: 'map',
+                layers: [basic,
+                    untiled,
+                    tiled
+                ],
+                view: new ol.View({
+                    projection: projection,
+                })
+            });
+            map.getView().fit(bounds, map.getSize());
+        }
+
+
+    </script>
+</head>
+<body onLoad="init()">
+<div id="map">
+
+</div>
+</div>
+</body>
+</html> 

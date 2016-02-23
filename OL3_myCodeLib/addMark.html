@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>利用矢量图成vector添加一个marker</title>
+    <link rel="stylesheet" href="http://openlayers.org/en/v3.0.0/css/ol.css" type="text/css">
+    <script src="http://openlayers.org/en/v3.11.2/build/ol.js"></script>
+
+</head>
+<body>
+<div id="map" style="width:1000px;height:1000px"></div>
+<script>
+    var map;
+    function initMap() {
+        map = new ol.Map({
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                })
+            ],
+            target: 'map',
+            controls: ol.control.defaults({
+                attributionOptions:  ({
+                    collapsible: false,
+                })
+            }),
+            view: new ol.View({
+                center: ol.proj.fromLonLat([103.986908, 1.353199]),
+                rotation: 68*Math.PI/180,
+                zoom: 18
+            })
+        });
+    }
+    function invokeAddMarker(){
+        var markerData = [
+            {
+                "title": 'point1',
+                "lat": 1.350664,
+                "lng": 103.985190,
+                "description": 'yyyy'
+            }, {
+                "title": 'point2',
+                "lat":1.353604,
+                "lng": 103.986395,
+                "description": 'zzz'
+            }, {
+                "title": 'point3',
+                "lat": 1.357227,
+                "lng": 103.9879999,
+                "description": 'uuu'
+            }
+        ];
+        for(var i=0;i<markerData.length;i++){
+            addmarker(markerData[i].lat,markerData[i].lng);
+        }
+        /*addmarker(1.350664,103.985190);
+         addmarker(1.353604,103.986395);
+         addmarker(1.357227,103.9879999);*/
+    }
+    function addmarker(lat,lng){
+        console.log("*****lat******"+lat);
+        console.log("*****lng******"+lng);
+        var iconFeature = new ol.Feature({
+            geometry: new ol.geom.Point(ol.proj.transform([lng,lat],'EPSG:4326', 'EPSG:3857')),
+            name: 'camera'
+        });
+        var iconStyle = new ol.style.Style({
+            image: new ol.style.Icon(({
+                anchor: [0.5, 46],
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'pixels',
+                opacity: 0.75,
+                src: 'data/icon.png'
+            }))
+        });
+        iconFeature.setStyle(iconStyle);
+       var vectorSource = new ol.source.Vector({
+            features: [iconFeature]
+        });
+        /*t clear the markers*/
+        /*vectorSource.clear();*/
+        vectorLayer = new ol.layer.Vector({
+            source: vectorSource
+        });
+        map.addLayer(vectorLayer);
+    }
+    initMap();
+    invokeAddMarker();
+</script>
+
+</body>
+
+</html>
